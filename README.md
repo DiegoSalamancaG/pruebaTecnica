@@ -52,7 +52,7 @@ npm install
 
 ```
 PORT=3000
-DB_PATH=./tareas.sqlite
+DB_PATH= ./database/pruebatecnica.db
 ```
 
 4. Si aún no tienes la base de datos:
