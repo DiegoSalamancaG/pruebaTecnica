@@ -1,39 +1,81 @@
 import { connectDB } from "../config/db.js";
 
-//funcion para obtener todas las tareas
-export async function getAllTareas() {
-  const db = await connectDB();
-  return db.all("SELECT * FROM tareas");
+// Crear nueva tarea
+export async function createTask({ titulo, descripcion }) {
+  try {
+    const db = await connectDB();
+    const result = await db.run(
+      `INSERT INTO tareas (titulo, descripcion) VALUES (?, ?)`,
+      [titulo, descripcion]
+    );
+
+    return {
+      id: result.lastID,
+      titulo,
+      descripcion,
+      status: 0, // por defecto pendiente
+    };
+  } catch (error) {
+    console.error("Error al crear tarea:", error);
+    res.status(500).json({ error: "Error al crear tarea" });
+  }
 }
 
-//funcion para agregar tarea
-export async function createTarea({ titulo, descripcion }) {
-  const db = await connectDB();
-  const fecha = new Date().toISOString();
-  return db.run(`INSERT INTO tareas (titulo, descripcion) VALUES (?, ?)`, [
-    titulo,
-    descripcion,
-  ]);
+// Obtener todas las tareas
+export async function getAllTasks() {
+  try {
+    const db = await connectDB();
+    const tasks = await db.all("SELECT * FROM tareas");
+    return tasks;
+  } catch (error) {
+    console.error("Error al obtener tareas:", error);
+    res.status(500).json({ error: "Error al obtener tareas" });
+  }
 }
 
-//funcion para listar una tarea
-export async function getTareaById(id) {
-  const db = await connectDB();
-  return db.get("SELECT * FROM tareas WHERE id = ?", [id]);
+// Obtener tarea por ID
+export async function getTaskById(id) {
+  try {
+    const db = await connectDB();
+    const tarea = await db.get("SELECT * FROM tareas WHERE id = ?", [id]);
+    return tarea;
+  } catch (error) {
+    console.error("Error al obtener la tarea por ID:", error);
+    throw error;
+  }
 }
 
-//funcion para eliminar una tarea
-export async function deleteTarea(id) {
-  const db = await connectDB();
-  return db.run("DELETE FROM tareas WHERE id = ?", [id]);
+// Eliminar tarea
+export async function deleteTask(id) {
+  try {
+    const db = await connectDB();
+    const result = await db.run("DELETE FROM tareas WHERE id = ?", [id]);
+    return result.changes > 0;
+  } catch (error) {
+    console.error("Error al eliminar tarea:", error);
+    throw error;
+  }
 }
 
-//funcion para modificar una tarea
-export async function updateTarea(id, { status }) {
-  const db = await connectDB();
-  const fecha = new Date().toISOString();
-  return db.run(
-    `UPDATE tareas SET status = ?, fechaActualizacion = ? WHERE id = ?`,
-    [status, fecha, id]
-  );
+// Actualizar tarea
+export async function updateTask(id, { titulo, descripcion, status }) {
+  try {
+    const db = await connectDB();
+    const result = await db.run(
+      `
+      UPDATE tareas
+      SET titulo = ?, descripcion = ?, status = ? WHERE id = ?
+      `,
+      [titulo, descripcion, status, id]
+    );
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: "Tarea no encontrada" });
+    }
+    return result.changes > 0;
+    res.json({ message: "Tarea actualizada correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar tarea:", error);
+    return null;
+  }
 }

@@ -3,25 +3,51 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import tareasRoutes from "./routes/tareasRoutes.js";
 
+//agregamos el socket.io
+import { createServer } from "http";
+import { Server } from "socket.io";
+
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const httpServer = createServer(app);
 
-//parsear JSON
+//configuramos socket
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+  },
+});
+
+//inicializamos(?) io
+app.set("io", io);
+
+//middleware
 app.use(express.json());
 
-app.use("api/tasks", tareasRoutes);
+//rutas
+app.use("/api/tasks", tareasRoutes);
 
+//conexion  websocket
+io.on("connection", (socket) => {
+  console.log("Cliente conectado vía webSocket:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("Cliente desconectado", socket.id);
+  });
+});
+
+const PORT = process.env.PORT || 3001;
+
+//conectamos con ddbb
 const init = async () => {
-  const db = await connectDB();
+  await connectDB();
   console.log("Base de datos SQLite conectada.");
 };
 
-init();
-
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto :${PORT}`);
-  console.log("Api");
-  console.log(`http://localhost:${PORT}/api/tasks`);
+httpServer.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Api disponible http://localhost:${PORT}/api/tasks`);
 });
+
+init();
