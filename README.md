@@ -22,8 +22,10 @@ Esta es una pequeña API REST para gestionar tareas, construida con **Node.js**,
 ├── config/             # Configuración de base de datos
 │   └── db.js
 ├── controllers/        # Lógica de los endpoints
+├── database/           # Base de datos de la aplicacion
 ├── models/             # Modelo de la base de datos
 ├── routes/             # Rutas de la API
+├── utils               # Carpeta para las utilidades
 ├── seed.js             # Script JS para insertar tareas de prueba
 ├── .env                # Variables de entorno
 ├── .gitignore
