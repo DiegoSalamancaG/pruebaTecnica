@@ -83,6 +83,7 @@ Abre tu terminal (puedes usar la terminal integrada de VS Code) y ejecuta el sig
 
 ```bash
 npm run dev
+```
 
 Este comando iniciará el servidor Express en modo desarrollo con Nodemon, lo que significa que se reiniciará automáticamente cada vez que guardes cambios en los archivos. El backend estará disponible en http://localhost:3000.
 
@@ -122,6 +123,7 @@ Live Server abrirá automáticamente tu navegador en una dirección como http://
 ---
 
 ## 📦 Dependencias
+
 Las principales dependencias utilizadas en este proyecto son:
 
 express: Framework web.
@@ -134,6 +136,7 @@ Puedes instalar todas las dependencias usando npm install.
 ---
 
 ## ✅ Estado Actual del Proyecto
+
 ✔️ API REST funcional: Permite crear, leer, actualizar y eliminar tareas.
 ✔️ Base de datos SQLite con triggers: Gestión eficiente de datos y acciones automatizadas.
 ✔️ Script de inicialización y poblamiento de la base de datos (seed.js).
@@ -160,4 +163,3 @@ Diego Salamanca – [(https://github.com/DiegoSalamancaG)]
 ## 📄 Licencia
 
 MIT
-```
