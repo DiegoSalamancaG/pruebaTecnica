@@ -7,6 +7,9 @@ import tareasRoutes from "./routes/tareasRoutes.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
+//cors
+import cors from "cors";
+
 dotenv.config();
 
 const app = express();
@@ -23,6 +26,7 @@ const io = new Server(httpServer, {
 app.set("io", io);
 
 //middleware
+app.use(cors());
 app.use(express.json());
 
 //rutas

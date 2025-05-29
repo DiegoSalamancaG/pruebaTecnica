@@ -1,3 +1,4 @@
+import { formatStatus } from "../utils/format.js";
 import {
   getAllTasks,
   getTaskById,
@@ -33,10 +34,11 @@ export async function createTaskController(req, res) {
 export async function getAllTasksController(req, res) {
   try {
     const tasks = await getAllTasks();
+    const formatedTask = tasks.map(formatStatus);
     res.json({
-      mensaje: "Listado de tareas obtenido correctamente",
+      message: "Listado de tareas obtenido correctamente",
       total: tasks.length,
-      tasks,
+      tasks: formatedTask,
     });
   } catch (error) {
     console.error("Error al listar tareas:", error);
@@ -48,15 +50,15 @@ export async function getAllTasksController(req, res) {
 export async function getTaskByIdController(req, res) {
   try {
     const { id } = req.params;
-    const tarea = await getTaskById(id);
+    const task = await getTaskById(id);
 
-    if (!tarea) {
+    if (!task) {
       return res.status(404).json({ error: "Tarea no encontrada" });
     }
 
     res.json({
-      mensaje: "Tarea obtenida exitosamente",
-      tarea,
+      message: "Tarea obtenida exitosamente",
+      task: formatStatus(task),
     });
   } catch (error) {
     console.error("Error al obtener tarea por ID:", error);
@@ -96,7 +98,7 @@ export async function updateTaskController(req, res) {
     const updatedTask = await getTaskById(id);
     res.json({
       message: "Tarea actualizada correctamente",
-      task: updatedTask,
+      task: formatStatus(updatedTask),
     });
   } catch (error) {
     console.error("Error al actualizar tarea:", error);

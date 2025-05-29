@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestor de Tareas</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      input,
+      button {
+        margin: 5px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        border-bottom: 1px solid #ccc;
+        padding: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Gestor de Tareas</h1>
+
+    <form id="form">
+      <input type="text" id="titulo" placeholder="Título" required />
+      <input type="text" id="descripcion" placeholder="Descripción" />
+      <button type="submit">Crear tarea</button>
+    </form>
+
+    <h2>Lista de Tareas</h2>
+    <ul id="tareas"></ul>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script>
+      const socket = io("http://localhost:3000");
+      const tareasUl = document.getElementById("tareas");
+      const form = document.getElementById("form");
+      const tituloInput = document.getElementById("titulo");
+      const descripcionInput = document.getElementById("descripcion");
+
+      // Cargar tareas al iniciar
+      fetch("http://localhost:3000/api/tasks/")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.tasks && Array.isArray(data.tasks)) {
+            data.tasks.forEach(agregarTareaAlDOM);
+          }
+        })
+        .catch((err) => console.error("Error al cargar tareas:", err));
+
+      // Crear tarea
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const tarea = {
+          titulo: tituloInput.value,
+          descripcion: descripcionInput.value,
+        };
+        const res = await fetch("http://localhost:3000/api/tasks/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(tarea),
+        });
+        const nuevaTarea = await res.json();
+        tituloInput.value = "";
+        descripcionInput.value = "";
+      });
+
+      // Escuchar evento de nueva tarea
+      socket.on("newTask", (task) => {
+        agregarTareaAlDOM(task);
+      });
+
+      // Escuchar evento de actualización
+      socket.on("taskUpdated", ({ id, status }) => {
+        const li = document.getElementById(`task-${id}`);
+        if (li) {
+          li.style.textDecoration = status === 1 ? "line-through" : "none";
+        }
+      });
+
+      function agregarTareaAlDOM(task) {
+        const li = document.createElement("li");
+        li.id = `task-${task.id}`;
+        li.innerHTML = `
+          <strong>${task.titulo}</strong>: ${
+          task.descripcion || "Sin descripción"
+        } 
+          <button onclick="actualizarEstado(${task.id}, ${task.status})">
+            ${task.status === 0 ? "Completar" : "Reabrir"}
+          </button>
+        `;
+        li.style.textDecoration = task.status === 1 ? "line-through" : "none";
+        tareasUl.appendChild(li);
+      }
+
+      async function actualizarEstado(id, estadoActual) {
+        const nuevoEstado = estadoActual === 0 ? 1 : 0;
+        await fetch(`http://localhost:3000/api/tasks/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: nuevoEstado }),
+        });
+      }
+    </script>
+  </body>
+</html>
